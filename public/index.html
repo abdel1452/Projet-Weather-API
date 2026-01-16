@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Météo & Géolocalisation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --weather-gradient: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --card-hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-bottom: 2rem;
+        }
+
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs {
+            border: none;
+        }
+
+        .nav-link {
+            color: #667eea;
+            font-weight: 500;
+            border: none;
+            padding: 1rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #764ba2;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+
+        .nav-link.active {
+            color: #764ba2;
+            background: var(--primary-gradient);
+            color: white !important;
+            border-radius: 10px;
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .weather-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            box-shadow: var(--card-shadow);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .weather-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .location-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .weather-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .weather-icon-container {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .weather-icon-container img {
+            width: 120px;
+            height: 120px;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .temperature-display {
+            font-size: 4rem;
+            font-weight: 700;
+            background: var(--weather-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 1rem 0;
+        }
+
+        .condition-text {
+            font-size: 1.5rem;
+            color: #555;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .location-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            color: #666;
+        }
+
+        .location-info i {
+            color: #667eea;
+        }
+
+        .coordinates {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+
+        .coordinate-item {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 0.75rem 1.5rem;
+            border-radius: 15px;
+            font-weight: 500;
+            color: #667eea;
+        }
+
+        .air-quality-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin: 1.5rem 0;
+        }
+
+        .air-quality-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .air-quality-item:last-child {
+            border-bottom: none;
+        }
+
+        .mood-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-label i {
+            color: #667eea;
+        }
+
+        .form-control {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-submit {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .info-card {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .info-card-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-card-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .temperature-display {
+                font-size: 3rem;
+            }
+
+            .weather-card {
+                padding: 1.5rem;
+            }
+
+            .coordinates {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="navbar-custom">
+        <div class="container py-3">
+            <ul class="nav nav-tabs justify-content-center">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="index.html">
+                        <i class="bi bi-geo-alt-fill"></i> Nouvelle localisation
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="all.html">
+                        <i class="bi bi-list-ul"></i> Toutes les positions
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="weather-card">
+            <div class="weather-header">
+                <h1 class="display-4 fw-bold mb-3" style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    <i class="bi bi-cloud-sun"></i> Météo Actuelle
+                </h1>
+            </div>
+
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p class="mt-3">Récupération de votre position...</p>
+            </div>
+
+            <div id="weatherContent" style="display: none;">
+                <div class="location-card">
+                    <h5 class="mb-3"><i class="bi bi-geo-alt"></i> Localisation</h5>
+                    <div class="location-info">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <span><strong>Ville:</strong> <span id="city">—</span></span>
+                    </div>
+                    <div class="location-info">
+                        <i class="bi bi-flag-fill"></i>
+                        <span><strong>Pays:</strong> <span id="country">—</span></span>
+                    </div>
+                    <div class="coordinates">
+                        <div class="coordinate-item">
+                            <i class="bi bi-geo"></i> Lat: <span id="latitude">—</span>°
+                        </div>
+                        <div class="coordinate-item">
+                            <i class="bi bi-geo"></i> Long: <span id="longitude">—</span>°
+                        </div>
+                    </div>
+                </div>
+
+                <div class="weather-icon-container">
+                    <img id="icon" alt="Weather Icon" src="">
+                </div>
+
+                <div class="text-center">
+                    <div class="temperature-display">
+                        <span id="temperature">-</span>°C
+                    </div>
+                    <div class="condition-text">
+                        <span id="summary">-</span>
+                    </div>
+                </div>
+
+                <div class="air-quality-section">
+                    <h5 class="mb-3"><i class="bi bi-wind"></i> Qualité de l'air</h5>
+                    <div class="air-quality-item">
+                        <span><i class="bi bi-speedometer2"></i> Index UK DEFRA</span>
+                        <strong><span id="airQualityIndex">-</span></strong>
+                    </div>
+                    <div class="air-quality-item">
+                        <span><i class="bi bi-droplet"></i> PM2.5 (µg/m³)</span>
+                        <strong><span id="pm25">-</span></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mood-section">
+            <label for="mood" class="form-label">
+                <i class="bi bi-emoji-smile"></i> Comment vous sentez-vous ?
+            </label>
+            <input type="text" id="mood" class="form-control" placeholder="Ex: heureux, triste, énergique, détendu...">
+            <div class="d-grid mt-4">
+                <button id="submit" class="btn btn-submit">
+                    <i class="bi bi-send-fill"></i> Enregistrer ma position
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+let lat;
+let long;
+let city;
+let country;
+let condition;
+let temperature;
+let defra;
+let pm25;
+
+const button = document.getElementById('submit');
+const loadingSpinner = document.getElementById('loadingSpinner');
+const weatherContent = document.getElementById('weatherContent');
+
+// Afficher le spinner au chargement
+loadingSpinner.style.display = 'block';
+weatherContent.style.display = 'none';
+
+button.addEventListener('click', async event => {
+    const mood = document.getElementById('mood').value;
+    
+    if (!mood || mood.trim() === '') {
+        alert('Veuillez entrer votre humeur avant d\'enregistrer.');
+        return;
+    }
+
+    if (!lat || !long) {
+        alert('Position non disponible. Veuillez attendre le chargement de la météo.');
+        return;
+    }
+
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enregistrement...';
+
+    const data = { lat, long, mood, country, city, condition, temperature, defra, pm25 };
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    };
+
+    try {
+        const response = await fetch('/api', options);
+        
+        // Vérifier le type de contenu avant de parser
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Réponse non-JSON reçue:', text.substring(0, 200));
+            throw new Error('Le serveur a renvoyé une réponse invalide. Vérifiez que le serveur est démarré.');
+        }
+        
+        const dataResponse = await response.json();
+        
+        if (dataResponse.status === 'success') {
+            button.innerHTML = '<i class="bi bi-check-circle-fill"></i> Enregistré avec succès !';
+            button.style.background = 'linear-gradient(135deg, #00b894 0%, #00cec9 100%)';
+            
+            setTimeout(() => {
+                button.innerHTML = '<i class="bi bi-send-fill"></i> Enregistrer ma position';
+                button.style.background = '';
+                button.disabled = false;
+                document.getElementById('mood').value = '';
+            }, 2000);
+        } else {
+            throw new Error('Erreur lors de l\'enregistrement');
+        }
+    } catch (error) {
+        console.error(error);
+        button.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Erreur';
+        button.style.background = 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)';
+        
+        setTimeout(() => {
+            button.innerHTML = '<i class="bi bi-send-fill"></i> Enregistrer ma position';
+            button.style.background = '';
+            button.disabled = false;
+        }, 2000);
+    }
+});
+
+// Vérifier la géolocalisation
+if ("geolocation" in navigator) {
+    console.log('Geolocation available');
+
+    navigator.geolocation.getCurrentPosition(async position => {
+        try {
+            lat = position.coords.latitude;
+            long = position.coords.longitude;
+            
+            document.getElementById('latitude').textContent = lat.toFixed(6);
+            document.getElementById('longitude').textContent = long.toFixed(6);
+
+            const apiUrl = `/weather?${lat}/${long}`;
+            const response = await fetch(apiUrl);
+            
+            // Vérifier le type de contenu avant de parser
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Réponse non-JSON reçue:', text.substring(0, 200));
+                throw new Error('Le serveur a renvoyé une réponse invalide. Vérifiez que le serveur est démarré et que la clé API météo est configurée.');
+            }
+
+            const json = await response.json();
+
+            if (!response.ok) {
+                throw new Error(json.error?.message || json.message || 'Erreur lors de la récupération de la météo');
+            }
+
+            const defraIndex = json.current.air_quality['gb-defra-index'];
+            let defraText = '';
+
+            if (defraIndex === 1) {
+                defraText = 'Faible';
+            } else if (defraIndex === 2) {
+                defraText = 'Modérée';
+            } else if (defraIndex === 3) {
+                defraText = 'Élevée';
+            } else if (defraIndex === 4) {
+                defraText = 'Très élevée';
+            } else {
+                defraText = 'Indéterminé';
+            }
+
+            city = json.location.name;
+            country = json.location.country;
+            condition = json.current.condition.text;
+            temperature = json.current.temp_c;
+            pm25 = json.current.air_quality.pm2_5;
+            defra = defraText;
+
+            document.getElementById('city').textContent = city;
+            document.getElementById('country').textContent = country;
+            document.getElementById('icon').src = json.current.condition.icon;
+            document.getElementById('summary').textContent = condition;
+            document.getElementById('temperature').textContent = temperature;
+            document.getElementById('airQualityIndex').textContent = defra;
+            document.getElementById('pm25').textContent = pm25.toFixed(2);
+
+            // Masquer le spinner et afficher le contenu
+            loadingSpinner.style.display = 'none';
+            weatherContent.style.display = 'block';
+        }
+        catch (error) {
+            console.error(error);
+            loadingSpinner.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Erreur: ${error.message}
+                </div>
+            `;
+        }
+    }, error => {
+        console.error('Erreur de géolocalisation:', error);
+        loadingSpinner.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle-fill"></i> Impossible d'accéder à votre position. 
+                Veuillez autoriser la géolocalisation dans les paramètres de votre navigateur.
+            </div>
+        `;
+    });
+} else {
+    console.log('Geolocation not available');
+    loadingSpinner.innerHTML = `
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle-fill"></i> La géolocalisation n'est pas disponible sur ce navigateur.
+        </div>
+    `;
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toutes les géolocalisations</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --weather-gradient: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --card-hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-bottom: 2rem;
+        }
+
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs {
+            border: none;
+        }
+
+        .nav-link {
+            color: #667eea;
+            font-weight: 500;
+            border: none;
+            padding: 1rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #764ba2;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+
+        .nav-link.active {
+            color: #764ba2;
+            background: var(--primary-gradient);
+            color: white !important;
+            border-radius: 10px;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status-badge {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .record-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .record-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .card-header-custom {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-body-custom {
+            padding: 1.5rem;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+
+        .info-item i {
+            color: #667eea;
+            font-size: 1.25rem;
+        }
+
+        .info-item-label {
+            font-weight: 600;
+            color: #555;
+            margin-right: 0.5rem;
+        }
+
+        .info-item-value {
+            color: #333;
+        }
+
+        .weather-section {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 15px;
+            margin-top: 1rem;
+        }
+
+        .weather-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .weather-item {
+            text-align: center;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .weather-item-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .weather-item-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .mood-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--secondary-gradient);
+            color: white;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 4rem 2rem;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #ccc;
+            margin-bottom: 1rem;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3rem;
+        }
+
+        @media (max-width: 768px) {
+            .info-row {
+                grid-template-columns: 1fr;
+            }
+
+            .weather-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="navbar-custom">
+            <div class="container py-3">
+                <ul class="nav nav-tabs justify-content-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="bi bi-geo-alt-fill"></i> Nouvelle localisation
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="all.html">
+                            <i class="bi bi-list-ul"></i> Toutes les positions
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="main-container">
+            <div class="page-header">
+                <h1 class="display-4 fw-bold">
+                    <i class="bi bi-map"></i> Mes géolocalisations
+                </h1>
+            </div>
+
+            <div id="status" class="status-badge" style="display: none;"></div>
+
+            <div id="loadingSpinner" class="loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p class="mt-3">Chargement des données...</p>
+            </div>
+
+            <div id="recordsContainer"></div>
+            
+            <div id="emptyMessage" class="empty-state" style="display:none">
+                <i class="bi bi-inbox"></i>
+                <h3 class="mt-3">Aucun enregistrement trouvé</h3>
+                <p class="text-muted">Commencez par enregistrer votre première localisation !</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatDateFrench(timestamp) {
+            const date = new Date(timestamp);
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: 'Europe/Paris'
+            };
+            return date.toLocaleDateString('fr-FR', options);
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        async function loadAll() {
+            const statusEl = document.getElementById('status');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const container = document.getElementById('recordsContainer');
+            const emptyMessage = document.getElementById('emptyMessage');
+
+            loadingSpinner.style.display = 'block';
+            container.innerHTML = '';
+            emptyMessage.style.display = 'none';
+            statusEl.style.display = 'none';
+
+            try {
+                const res = await fetch('/all');
+                
+                // Vérifier le type de contenu avant de parser
+                const contentType = res.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await res.text();
+                    console.error('Réponse non-JSON reçue:', text.substring(0, 200));
+                    throw new Error('Le serveur a renvoyé une réponse invalide. Vérifiez que le serveur est démarré.');
+                }
+                
+                const json = await res.json();
+                
+                if (res.ok && json.status === 'success') {
+                    const rows = json.data;
+                    loadingSpinner.style.display = 'none';
+
+                    if (!rows || rows.length === 0) {
+                        emptyMessage.style.display = 'block';
+                        container.style.display = 'none';
+                    } else {
+                        emptyMessage.style.display = 'none';
+                        container.style.display = 'block';
+
+                        rows.forEach((r, i) => {
+                            const card = document.createElement('div');
+                            card.className = 'record-card';
+                            
+                            const dateStr = r.timestamp ? formatDateFrench(r.timestamp) : '-';
+                            const timeStr = r.timestamp ? formatTime(r.timestamp) : '-';
+                            const mood = r.mood || 'non renseigné';
+                            const lat = r.latitude ? parseFloat(r.latitude).toFixed(6) : '-';
+                            const lon = r.longitude ? parseFloat(r.longitude).toFixed(6) : '-';
+                            const ville = r.ville || '-';
+                            const pays = r.pays || '-';
+                            const temperature = r.temperature !== null && r.temperature !== undefined ? parseFloat(r.temperature).toFixed(1) : '-';
+                            const condition = r.condition || '-';
+                            const defra = r.defra || '-';
+                            const pm25 = r.pm25 !== null && r.pm25 !== undefined ? parseFloat(r.pm25).toFixed(2) : '-';
+
+                            card.innerHTML = `
+                                <div class="card-header-custom">
+                                    <i class="bi bi-calendar-event"></i>
+                                    <span>${dateStr} à ${timeStr}</span>
+                                </div>
+                                <div class="card-body-custom">
+                                    <div class="info-row">
+                                        <div class="info-item">
+                                            <i class="bi bi-emoji-smile"></i>
+                                            <span class="info-item-label">Humeur:</span>
+                                            <span class="mood-badge">${mood}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="bi bi-geo-alt-fill"></i>
+                                            <span class="info-item-label">Ville:</span>
+                                            <span class="info-item-value">${ville}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="bi bi-flag-fill"></i>
+                                            <span class="info-item-label">Pays:</span>
+                                            <span class="info-item-value">${pays}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-row">
+                                        <div class="info-item">
+                                            <i class="bi bi-geo"></i>
+                                            <span class="info-item-label">Latitude:</span>
+                                            <span class="info-item-value">${lat}°</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="bi bi-geo"></i>
+                                            <span class="info-item-label">Longitude:</span>
+                                            <span class="info-item-value">${lon}°</span>
+                                        </div>
+                                    </div>
+
+                                    ${temperature !== '-' || condition !== '-' || defra !== '-' || pm25 !== '-' ? `
+                                    <div class="weather-section">
+                                        <h6 class="mb-3"><i class="bi bi-cloud-sun"></i> Données météorologiques</h6>
+                                        <div class="weather-grid">
+                                            ${temperature !== '-' ? `
+                                            <div class="weather-item">
+                                                <div class="weather-item-label">Température</div>
+                                                <div class="weather-item-value">${temperature}°C</div>
+                                            </div>
+                                            ` : ''}
+                                            ${condition !== '-' ? `
+                                            <div class="weather-item">
+                                                <div class="weather-item-label">Condition</div>
+                                                <div class="weather-item-value" style="font-size: 1rem;">${condition}</div>
+                                            </div>
+                                            ` : ''}
+                                            ${defra !== '-' ? `
+                                            <div class="weather-item">
+                                                <div class="weather-item-label">Index DEFRA</div>
+                                                <div class="weather-item-value">${defra}</div>
+                                            </div>
+                                            ` : ''}
+                                            ${pm25 !== '-' ? `
+                                            <div class="weather-item">
+                                                <div class="weather-item-label">PM2.5</div>
+                                                <div class="weather-item-value">${pm25} µg/m³</div>
+                                            </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            `;
+                            container.appendChild(card);
+                        });
+                    }
+
+                    statusEl.textContent = `✓ ${rows.length} enregistrement(s) chargé(s)`;
+                    statusEl.style.display = 'block';
+                    statusEl.style.background = 'linear-gradient(135deg, #00b894 0%, #00cec9 100%)';
+                    statusEl.style.color = 'white';
+                } else {
+                    loadingSpinner.style.display = 'none';
+                    statusEl.textContent = '❌ Erreur: ' + (json.message || 'Réponse invalide');
+                    statusEl.style.display = 'block';
+                    statusEl.style.background = 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)';
+                    statusEl.style.color = 'white';
+                }
+            } catch (err) {
+                loadingSpinner.style.display = 'none';
+                statusEl.textContent = '❌ Erreur réseau: ' + err.message;
+                statusEl.style.display = 'block';
+                statusEl.style.background = 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)';
+                statusEl.style.color = 'white';
+            }
+        }
+
+        // Charger au démarrage
+        loadAll();
+
+        // Rafraîchir automatiquement toutes les 30 secondes
+        setInterval(loadAll, 30000);
+    </script>
+</body>
+</html>
+ 
+ 
